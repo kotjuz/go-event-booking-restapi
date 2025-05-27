@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"example.com/eventapi/db"
 	"example.com/eventapi/models"
@@ -13,9 +14,28 @@ func main() {
 	server := gin.Default()
 
 	server.GET("/events", getEvents)
+	server.GET("/events/:id", getSingleEvent)
 	server.POST("/events", createEvent)
 
 	server.Run(":8080")
+
+}
+
+func getSingleEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Wrong id value."})
+		return
+	}
+
+	event, err := models.GetSingleEvent(eventId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch event from database."})
+		return
+	}
+
+	context.JSON(http.StatusOK, event)
 
 }
 
