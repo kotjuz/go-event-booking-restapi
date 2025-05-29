@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"example.com/eventapi/models"
+	"example.com/eventapi/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,4 +31,19 @@ func loginUser(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
 	}
+
+	err = user.ValidateCredentials()
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	token, err := utils.GenerateToken(user.Email, user.ID)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not auth user"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Login succesful!", "token:": token})
 }
