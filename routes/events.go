@@ -66,10 +66,17 @@ func updateEvent(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Wrong id value."})
 		return
 	}
-	_, err = models.GetSingleEvent(eventId)
+	userId := context.GetInt64("userId")
+	event, err := models.GetSingleEvent(eventId)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from database"})
+		return
+	}
+
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized to update event"})
+		return
 	}
 
 	var updatedEvent models.Event
