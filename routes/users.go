@@ -14,12 +14,14 @@ func createUser(context *gin.Context) {
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
+		return
 	}
 
 	err = newUser.Save()
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create user"})
+		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Created new user"})
 }
@@ -30,6 +32,7 @@ func loginUser(context *gin.Context) {
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
+		return
 	}
 
 	err = user.ValidateCredentials()
