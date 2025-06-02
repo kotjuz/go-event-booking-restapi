@@ -103,10 +103,16 @@ func deleteEvent(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Wrong id value"})
 	}
 
+	userId := context.GetInt64("userId")
 	event, err := models.GetSingleEvent(eventId)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from database"})
+	}
+
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized to delete event"})
+		return
 	}
 
 	err = event.Delete()
